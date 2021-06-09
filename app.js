@@ -1,5 +1,3 @@
-// let buttons = [...document.querySelectorAll("button")];
-// let numbers = [...document.querySelectorAll(".number")];
 let numbers = document.querySelectorAll(".number");
 let input = document.querySelector("input[type='text']")
 let operators = document.querySelectorAll(".operation")
@@ -15,18 +13,13 @@ function writeNumbers() {
 }
 writeNumbers()
 
-// function numsToArray() {
-
-// }
-
-let operations = ["x", "-", "+", "/"];
 function addOperation() {
     for (let operator of operators) {
         operator.addEventListener("click", () => {
-            if (operations.includes(input.value[input.value.length - 1])) {
+            if (Object.keys(op).includes(input.value[input.value.length - 1])) {
                 input.value = input.value.replace(input.value[input.value.length - 1], operator.textContent)
             }
-            else if (input.value.indexOf("x") > 0) {
+            else if (/\D/.test(input.value)) {
                 console.log("Show result and show that operation")
             }
             else if (input.value[input.value.length - 1] !== operator.textContent) {
@@ -54,6 +47,9 @@ let op = {
         return a / b
     },
 }
+function numsToArray() {
+    input.value.split(/\D/)
+}
 
 // function result() {
 
@@ -63,6 +59,6 @@ let op = {
 
 // }
 
-// function dealeteOne(){
+// function deleteOne(){
 
 // };
