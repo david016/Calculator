@@ -4,7 +4,14 @@ let operators = document.querySelectorAll(".operation")
 let equalsSign = document.querySelector(".equals")
 let del = document.querySelector(".deleteOne")
 let ce = document.querySelector(".deleteAll")
+let squareRoot = document.querySelector(".squareRoot")
 
+function writeSquareRoot() {
+    squareRoot.addEventListener("click", () => {
+        input.value = squareRoot.textContent;
+    })
+}
+writeSquareRoot();
 
 function writeNumbers() {
     for (let num of numbers) {
@@ -13,7 +20,6 @@ function writeNumbers() {
         })
     }
 }
-
 writeNumbers()
 
 let operations = {
@@ -29,6 +35,10 @@ let operations = {
     "/": function (a, b) {
         return a / b
     },
+    "squareRoot": function (a) {
+        console.log(Math.sqrt(a))
+        return Math.sqrt(a)
+    },
 }
 
 function addOperation() {
@@ -38,16 +48,16 @@ function addOperation() {
             if (Object.keys(operations).includes(input.value[input.value.length - 1])) {
                 input.value = input.value.replace(input.value[input.value.length - 1], operator.textContent)
             }
+            else if (/\D/.test(input.value[0])) {
+                input.value = operations["squareRoot"](input.value.slice(1))
+                input.value += lastOperator;
+            }
             else if (/\D/.test(input.value)) {
-                console.log("Show result and show that operation")
                 result(getNumbers(), getOperation());
                 input.value += lastOperator;
             }
             else if (input.value[input.value.length - 1] !== operator.textContent) {
                 input.value += operator.textContent;
-            }
-            else {
-                console.log("hi")
             }
         })
     }
@@ -65,8 +75,8 @@ function getOperation() {
 }
 
 function result(numbers, operation) {
-    console.log(operation(numbers[0], numbers[1]))
-    input.value = `${operation(numbers[0], numbers[1])}`;
+    // console.log(operation(numbers[0], numbers[1]))
+    input.value = operation(numbers[0], numbers[1]);
 }
 
 equalsSign.addEventListener("click", () => {
@@ -86,5 +96,4 @@ function deleteAll() {
         input.value = "";
     })
 }
-
 deleteAll()
