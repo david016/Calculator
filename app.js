@@ -80,7 +80,9 @@ function result(numbers, operation) {
 }
 
 equalsSign.addEventListener("click", () => {
-    result(getNumbers(), getOperation())
+    if (/\D/.test(input.value[0])) {
+        input.value = operations["squareRoot"](input.value.slice(1))
+    } else result(getNumbers(), getOperation())
 })
 
 
