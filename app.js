@@ -5,22 +5,23 @@ let equalsSign = document.querySelector(".equals")
 let del = document.querySelector(".deleteOne")
 let ce = document.querySelector(".deleteAll")
 let squareRoot = document.querySelector(".squareRoot")
+let decimal = document.querySelector(".decimal")
 
-function writeSquareRoot() {
-    squareRoot.addEventListener("click", () => {
-        input.value = squareRoot.textContent;
-    })
+let storedInput = {
+    "firstNumber": ["+"],
+    "secondNumber": ["+"],
+    "operation": [],
 }
-writeSquareRoot();
 
-function writeNumbers() {
-    for (let num of numbers) {
-        num.addEventListener("click", () => {
-            input.value += num.textContent;
-        })
+function returnCurrentInput() {
+    if (storedInput["operation"].length === 0) {
+        console.log("firstNumber")
+        return "firstNumber"
+    } else {
+        console.log("secondNumber")
+        return "secondNumber"
     }
 }
-writeNumbers()
 
 let operations = {
     "x": function (a, b) {
@@ -35,60 +36,140 @@ let operations = {
     "/": function (a, b) {
         return a / b
     },
-    "squareRoot": function (a) {
-        console.log(Math.sqrt(a))
+    "√": function (a) {
         return Math.sqrt(a)
     },
 }
 
-function addOperation() {
+function inputSquareRoot() {
+    if (storedInput[returnCurrentInput()].length === 1) {
+        input.value += squareRoot.textContent;
+        storedInput[returnCurrentInput()].push(squareRoot.textContent);
+    }
+}
+function writeSquareRoot() {
+    squareRoot.addEventListener("click", () => inputSquareRoot())
+}
+writeSquareRoot()
+
+function writeOperation() {
     for (let operator of operators) {
         operator.addEventListener("click", () => {
-            let lastOperator = operator.textContent;
-            if (Object.keys(operations).includes(input.value[input.value.length - 1])) {
-                input.value = input.value.replace(input.value[input.value.length - 1], operator.textContent)
+            if (storedInput["operation"].length === 1) {
+                console.log(`Result is: `)
+                return result()
             }
-            else if (/\D/.test(input.value[0])) {
-                input.value = operations["squareRoot"](input.value.slice(1))
-                input.value += lastOperator;
-            }
-            else if (/\D/.test(input.value)) {
-                result(getNumbers(), getOperation());
-                input.value += lastOperator;
-            }
-            else if (input.value[input.value.length - 1] !== operator.textContent) {
+            if (input.value === "" && !/[x//]/.test(operator.textContent)) {
                 input.value += operator.textContent;
+                storedInput[returnCurrentInput()] = [operator.textContent];
+            }
+            if (storedInput[returnCurrentInput()][1] !== "√" && storedInput[returnCurrentInput()].length === 2 || storedInput[returnCurrentInput()].length > 2) {
+                input.value += operator.textContent;
+                storedInput["operation"].push(operator.textContent);
             }
         })
     }
 }
-addOperation();
+writeOperation();
 
-function getNumbers() {
-    [a, b] = (input.value.split(/\D/)).map(a => parseFloat(a))
-    return [a, b]
+function writeNumbers() {
+    for (let num of numbers) {
+        num.addEventListener("click", () => {
+            input.value += num.textContent;
+            storedInput[returnCurrentInput()].push(parseInt(num.textContent));
+        })
+    }
 }
+writeNumbers()
 
-function getOperation() {
-    operation = (input.value.split(/\d/)).filter(el => el !== "")
-    return operations[operation]
+function inputDecimal() {
+    if (storedInput[returnCurrentInput()].indexOf(".") < 0 && /[0-9]/.test(storedInput[returnCurrentInput()])) {
+        input.value += ".";
+        storedInput[returnCurrentInput()].push(".")
+    }
 }
-
-function result(numbers, operation) {
-    // console.log(operation(numbers[0], numbers[1]))
-    input.value = operation(numbers[0], numbers[1]);
+function writeDecimalSeparator() {
+    decimal.addEventListener("click", inputDecimal)
 }
+writeDecimalSeparator()
 
+
+
+function result() {
+    let firstNum;
+    let secondNum;
+    let res;
+
+    let firstInp = parseFloat(storedInput["firstNumber"].filter(el => {
+        return typeof (el) === "number" || el === "."
+    }).join(""))
+
+    let secondInp = parseFloat(storedInput["secondNumber"].filter(el => {
+        return typeof (el) === "number" || el === "."
+    }).join(""))
+
+    if (storedInput["firstNumber"][1] === "√") {
+        firstNum = parseFloat(storedInput["firstNumber"][0] + operations["√"](firstInp))
+    } else {
+        firstNum = parseFloat(storedInput["firstNumber"][0] + firstInp)
+    }
+
+    if (storedInput["secondNumber"][1] === "√") {
+        secondNum = parseFloat(storedInput["secondNumber"][0] + operations["√"](secondInp))
+    } else {
+        secondNum = parseFloat(storedInput["secondNumber"][0] + secondInp)
+    }
+    res = operations[storedInput["operation"]](firstNum, secondNum);
+    input.value = res;
+
+    function resultToFirstNumber() {
+        let arrFromRes = res.toString().split("");
+        let arrWithNumbers = [];
+        for (let el of arrFromRes) {
+            if (el !== "." && el !== "-") {
+                arrWithNumbers.push(parseInt(el))
+            } else arrWithNumbers.push(el)
+
+        }
+        return arrWithNumbers
+    }
+
+    if (res < 0) {
+        storedInput = {
+            "firstNumber": resultToFirstNumber(),
+            "secondNumber": ["+"],
+            "operation": [],
+        }
+    } else {
+        storedInput = {
+            "firstNumber": ["+", ...resultToFirstNumber()],
+            "secondNumber": ["+"],
+            "operation": [],
+        }
+    }
+
+    return res
+}
 equalsSign.addEventListener("click", () => {
-    if (/\D/.test(input.value[0])) {
-        input.value = operations["squareRoot"](input.value.slice(1))
-    } else result(getNumbers(), getOperation())
+    if (storedInput["operation"].length === 0) {
+        let firstInp = parseFloat(storedInput["firstNumber"].filter(el => {
+            return typeof (el) === "number" || el === "."
+        }).join(""))
+        let firstNumm = parseFloat(storedInput["firstNumber"][0] + operations["√"](firstInp))
+        input.value = firstNumm;
+    } else result()
+
 })
 
 
 function deleteOne() {
     del.addEventListener("click", () => {
-        input.value = input.value.slice(0, input.value.length - 1)
+        input.value = input.value.slice(0, input.value.length - 1);
+        if (returnCurrentInput() === "secondNumber" && storedInput["secondNumber"].length === 1) {
+            storedInput["operation"].pop();
+        } else {
+            storedInput[returnCurrentInput()].pop();
+        }
     })
 };
 deleteOne()
@@ -96,6 +177,11 @@ deleteOne()
 function deleteAll() {
     ce.addEventListener("click", () => {
         input.value = "";
+        storedInput = {
+            "firstNumber": ["+"],
+            "secondNumber": ["+"],
+            "operation": [],
+        }
     })
 }
 deleteAll()
