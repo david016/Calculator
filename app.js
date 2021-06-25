@@ -55,7 +55,7 @@ writeSquareRoot()
 function writeOperation() {
     for (let operator of operators) {
         operator.addEventListener("click", () => {
-            if (storedInput["operation"].length === 1) {
+            if (storedInput["operation"].length === 1 && storedInput["secondNumber"].length > 1) {
                 console.log(`Result is: `)
                 return result()
             }
